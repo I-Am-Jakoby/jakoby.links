@@ -29,6 +29,17 @@ dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
                               X. 9  `   '  P )X
                               `b  `       '  d'
                                `             '
+
+# Step 1
+> HTTP POST /_new { "redirect": "[url]" }
+< { "shortcode": "[code]", "redirect": "[url]", "status": 301 }
+
+# Step 2
+> HTTP POST|GET|PATCH|PUT|DELETE /[code]
+< HTTP 301 [url]
+
+# Step 3
+> Profit?
       </code>
     </pre>
   </body>

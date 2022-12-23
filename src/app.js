@@ -26,12 +26,12 @@ const generateShortcode = async (length = 1) => {
 }
 
 const formatShortcodeRecord = shortcodeRecord => ({
-  shortcode: get(shortcodeRecord, 'key'),
   status: get(shortcodeRecord, 'props.status', 301),
-  redirect: get(shortcodeRecord, 'props.redirect', process.env.WEBSITE)
+  redirect: get(shortcodeRecord, 'props.redirect', process.env.WEBSITE),
+  shortcode: get(shortcodeRecord, 'key')
 })
 
-app.post('/new', bodyParser.json(), async (req, res) => {
+app.post('/_new', bodyParser.json(), async (req, res) => {
   const redirect = get(req, 'body.redirect')
   if (!redirect) return res.sendStatus(400, 'No redirect URI provided')
 
@@ -51,6 +51,14 @@ app.post('/new', bodyParser.json(), async (req, res) => {
   const record = await shortcodes.get(shortcode)
   res.json(formatShortcodeRecord(record))
 })
+
+// app.get('/_list', (req, res) => {
+//
+// })
+
+// app.delete('/:shortcode', async (req, res) => {
+//
+// })
 
 app.use('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
