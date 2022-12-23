@@ -11,6 +11,10 @@ const lootDir = path.resolve(__dirname, '..', 'loot')
 const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
+// use EJS as our templating engine
+app.set('view engine', 'ejs')
+
+// Algorithm for generating a new shortcode
 const generateShortcode = async (length = 1) => {
   // Generate a new random word
   const shortcode = (new Chance()).word({ length })
@@ -25,12 +29,14 @@ const generateShortcode = async (length = 1) => {
   return await generateShortcode(length + 1)
 }
 
+// Output formatting for shortcode records
 const formatShortcodeRecord = shortcodeRecord => ({
   status: get(shortcodeRecord, 'props.status', 301),
   redirect: get(shortcodeRecord, 'props.redirect', process.env.WEBSITE),
   shortcode: get(shortcodeRecord, 'key')
 })
 
+// CREATE
 app.post('/_new', bodyParser.json(), async (req, res) => {
   const redirect = get(req, 'body.redirect')
   if (!redirect) return res.sendStatus(400, 'No redirect URI provided')
@@ -52,14 +58,12 @@ app.post('/_new', bodyParser.json(), async (req, res) => {
   res.json(formatShortcodeRecord(record))
 })
 
+// READ
 // app.get('/_list', (req, res) => {
 //
 // })
 
-// app.delete('/:shortcode', async (req, res) => {
-//
-// })
-
+// READ
 app.use('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
 
@@ -70,8 +74,17 @@ app.use('/:shortcode', async (req, res, next) => {
   res.redirect(status, redirect)
 })
 
+// DELETE
+// app.delete('/:shortcode', async (req, res) => {
+//
+// })
+
+// Catch-all
 app.use('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '..', 'static', 'index.html'))
+  res.render('index', {
+    website: process.env.WEBSITE
+  })
 })
 
+// Start service
 app.listen(process.env.PORT || 3000)
