@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 const Chance = require('chance')
 const CyclicDb = require('@cyclic.sh/dynamodb')
 
-const db = new CyclicDb('shortcodes')
+const db = new CyclicDb(process.env.APP_DB_NAME)
 const app = express()
 const lootDir = path.resolve(__dirname, '..', 'loot')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
