@@ -1,11 +1,12 @@
-const db = require('@cyclic.sh/dynamodb')
 const get = require('lodash/get')
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 
 const Chance = require('chance')
+const CyclicDB = require('@cyclic.sh/dynamodb')
 
+const db = new CyclicDB(process.env.APP_DB_NAME)
 const app = express()
 const lootDir = path.resolve(__dirname, '..', 'loot')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
