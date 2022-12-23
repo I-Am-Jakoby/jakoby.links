@@ -11,9 +11,9 @@ const lootDir = path.resolve(__dirname, '..', 'loot')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
 // Direct from the dox
-const CyclicDb = require("@cyclic.sh/dynamodb")
-const db = CyclicDb("good-puce-salmon-fezCyclicDB")
-const shortcodes = db.collection("shortcodes")
+const CyclicDb = require('@cyclic.sh/dynamodb')
+const db = CyclicDb(process.env.CYCLIC_DB)
+const shortcodes = db.collection('shortcodes')
 
 const generateShortcode = async (length = 1) => {
   // Generate a new random word
@@ -58,7 +58,7 @@ app.use('/:shortcode', async (req, res, next) => {
   try { record = await shortcodes.get(shortcode) }
   catch (e) { return next() }
 
-  const redirect = get(record, 'redirect', process.env.APP_WEBSITE)
+  const redirect = get(record, 'redirect', process.env.WEBSITE)
   const status = get(record, 'status', 301)
   res.redirect(status, redirect)
 })
@@ -67,9 +67,4 @@ app.use('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'static', 'index.html'))
 })
 
-const port =
-  process.env.PORT ||
-  process.env.APP_PORT ||
-  3000
-
-app.listen(port)
+app.listen(process.env.PORT || 3000)
