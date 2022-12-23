@@ -20,14 +20,20 @@ const generateShortcode = async (length = 1) => {
   const shortcode = (new Chance()).word({ length })
 
   // Check to see if there's an existing shortcode with this name
-  try { await shortcodes.get(shortcode) }
+  const existingShortcode = await shortcodes.get(shortcode)
 
-  // If there isn't, return the new shortcode
-  catch (e) { return shortcode }
+  // No existing shortcode? Great!
+  if (!existingShortcode) return shortcode
 
-  // If there is, try again
+  // Otherwise, try again
   return await generateShortcode(length + 1)
 }
+
+const formatShortcodeRecord = shortcodeRecord => ({
+  shortcode: get(shortcodeRecord, 'key'),
+  status: get(shortcodeRecord, 'props.status', 301),
+  redirect: get(shortcodeRecord, 'props.redirect', process.env.WEBSITE)
+})
 
 app.post('/new', bodyParser.json(), async (req, res) => {
   const redirect = get(req, 'body.redirect')
@@ -47,8 +53,7 @@ app.post('/new', bodyParser.json(), async (req, res) => {
   const shortcode = await generateShortcode()
   await shortcodes.set(shortcode, { redirect, status })
   const record = await shortcodes.get(shortcode)
-
-  res.json(record)
+  res.json(formatShortcodeRecord(record))
 })
 
 app.use('/:shortcode', async (req, res, next) => {
@@ -58,8 +63,7 @@ app.use('/:shortcode', async (req, res, next) => {
   try { record = await shortcodes.get(shortcode) }
   catch (e) { return next() }
 
-  const redirect = get(record, 'redirect', process.env.WEBSITE)
-  const status = get(record, 'status', 301)
+  const { status, redirect } = formatShortcodeRecord(record)
   res.redirect(status, redirect)
 })
 
