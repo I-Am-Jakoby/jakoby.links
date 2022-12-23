@@ -34,19 +34,19 @@ app.post('/new', bodyParser.json(), async (req, res) => {
   }
 
   const shortcode = generateShortcode()
-  const record = await shortcodes
-    .set(shortcode, { redirect, status })
+  await shortcodes.set(shortcode, { redirect, status })
+  const record = await shortcodes.get(shortcode)
 
   res.json(record)
 })
 
 app.use('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
-  const resource = await shortcodes.get(shortcode)
-  if (!resource) return next()
+  const record = await shortcodes.get(shortcode)
+  if (!record) return next()
 
-  const redirect = get(resource, 'redirect', process.env.APP_WEBSITE)
-  const status = get(resource, 'status', 301)
+  const redirect = get(record, 'redirect', process.env.APP_WEBSITE)
+  const status = get(record, 'status', 301)
   res.redirect(status, redirect)
 })
 
