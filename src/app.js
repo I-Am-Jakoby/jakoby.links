@@ -5,12 +5,10 @@ const bodyParser = require('body-parser')
 const Chance = require('chance')
 
 const db = require('@cyclic.sh/dynamodb')
-const flatCache = require('flat-cache')
 
 const app = express()
 
 const lootDir = path.resolve(__dirname, '..', 'loot')
-const cache = flatCache.load(process.env.APP_CACHE, lootDir)
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
 const generateShortcode = (length = 1) => {
