@@ -40,7 +40,7 @@ app.post('/new', bodyParser.json(), async (req, res) => {
   res.json(record)
 })
 
-app.get('/:shortcode', async (req, res, next) => {
+app.use('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
   const resource = await shortcodes.get(shortcode)
   if (!resource) return next()
