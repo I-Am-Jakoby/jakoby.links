@@ -11,10 +11,10 @@ const lootDir = path.resolve(__dirname, '..', 'loot')
 const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
-const generateShortcode = (length = 1) => {
+const generateShortcode = async (length = 1) => {
   const shortcode = (new Chance()).word({ length })
-  const existingRecord = cache.getKey(shortcode)
-  if (existingRecord) return generateShortcode(length + 1)
+  const existingRecord = await shortcodes.get(shortcode)
+  if (existingRecord) return await generateShortcode(length + 1)
   return shortcode
 }
 
@@ -33,7 +33,7 @@ app.post('/new', bodyParser.json(), async (req, res) => {
     return res.sendStatus(400, 'Invalid status')
   }
 
-  const shortcode = generateShortcode()
+  const shortcode = await generateShortcode()
   await shortcodes.set(shortcode, { redirect, status })
   const record = await shortcodes.get(shortcode)
 
