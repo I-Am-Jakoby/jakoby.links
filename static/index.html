@@ -31,7 +31,7 @@ dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
                                `             '
 
 # Step 1
-> HTTP POST /_new { "redirect": "[url]" }
+> HTTP POST /_new { "redirect": "[url]", "status": 301 }
 < { "shortcode": "[code]", "redirect": "[url]", "status": 301 }
 
 # Step 2
