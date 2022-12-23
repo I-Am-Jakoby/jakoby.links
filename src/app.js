@@ -12,7 +12,7 @@ const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
 // Direct from the dox
 const CyclicDb = require('@cyclic.sh/dynamodb')
-const db = CyclicDb('jakoby.dicks')
+const db = CyclicDb(process.env.CYCLIC_DB)
 const shortcodes = db.collection('shortcodes')
 
 const generateShortcode = async (length = 1) => {
