@@ -56,4 +56,9 @@ app.use('*', (req, res) => {
   res.sendStatus(404)
 })
 
-app.listen(process.env.APP_PORT)
+const port =
+  process.env.PORT ||
+  process.env.APP_PORT ||
+  3000
+
+app.listen(port)
