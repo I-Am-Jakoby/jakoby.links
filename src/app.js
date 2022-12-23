@@ -12,10 +12,17 @@ const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
 const generateShortcode = async (length = 1) => {
+  // Generate a new random word
   const shortcode = (new Chance()).word({ length })
-  const existingRecord = await shortcodes.get(shortcode)
-  if (existingRecord) return await generateShortcode(length + 1)
-  return shortcode
+
+  // Check to see if there's an existing shortcode with this name
+  try { await shortcodes.get(shortcode) }
+
+  // If there isn't, return the new shortcode
+  catch (e) { return shortcode }
+
+  // If there is, try again
+  return await generateShortcode(length + 1)
 }
 
 app.post('/new', bodyParser.json(), async (req, res) => {
@@ -42,8 +49,10 @@ app.post('/new', bodyParser.json(), async (req, res) => {
 
 app.use('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
-  const record = await shortcodes.get(shortcode)
-  if (!record) return next()
+
+  let record
+  try { record = await shortcodes.get(shortcode) }
+  catch (e) { return next() }
 
   const redirect = get(record, 'redirect', process.env.APP_WEBSITE)
   const status = get(record, 'status', 301)
