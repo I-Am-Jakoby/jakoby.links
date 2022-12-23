@@ -1,4 +1,3 @@
-const db = require('@cyclic.sh/dynamodb')
 const get = require('lodash/get')
 const path = require('path')
 const express = require('express')
@@ -8,8 +7,13 @@ const Chance = require('chance')
 
 const app = express()
 const lootDir = path.resolve(__dirname, '..', 'loot')
-const shortcodes = db.collection('shortcodes')
+// const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
+
+// Direct from the dox
+const CyclicDb = require("@cyclic.sh/dynamodb")
+const db = CyclicDb("good-puce-salmon-fezCyclicDB")
+const shortcodes = db.collection("shortcodes")
 
 const generateShortcode = async (length = 1) => {
   // Generate a new random word
