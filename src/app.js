@@ -1,14 +1,14 @@
+const db = require('@cyclic.sh/dynamodb')
 const get = require('lodash/get')
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 
 const Chance = require('chance')
-const CyclicDB = require('@cyclic.sh/dynamodb')
 
-const db = new CyclicDB(process.env.APP_DB_NAME)
 const app = express()
 const lootDir = path.resolve(__dirname, '..', 'loot')
+const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
 const generateShortcode = (length = 1) => {
@@ -34,7 +34,7 @@ app.post('/new', bodyParser.json(), async (req, res) => {
   }
 
   const shortcode = generateShortcode()
-  const record = await db.collection('shortcodes')
+  const record = await shortcodes
     .set(shortcode, { redirect, status })
 
   res.json(record)
@@ -42,7 +42,7 @@ app.post('/new', bodyParser.json(), async (req, res) => {
 
 app.get('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
-  const resource = await db.collection('shortcodes').get(shortcode)
+  const resource = await shortcodes.get(shortcode)
   if (!resource) return next()
 
   const redirect = get(resource, 'redirect', process.env.APP_WEBSITE)
