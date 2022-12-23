@@ -1,9 +1,11 @@
 const get = require('lodash/get')
 const path = require('path')
 const express = require('express')
-const flatCache = require('flat-cache')
 const bodyParser = require('body-parser')
 const Chance = require('chance')
+
+const db = require('@cyclic.sh/dynamodb')
+const flatCache = require('flat-cache')
 
 const app = express()
 
@@ -18,17 +20,17 @@ const generateShortcode = (length = 1) => {
   return shortcode
 }
 
-app.get('/:shortcode', (req, res, next) => {
-  const resourceName = get(req, 'params.shortcode')
-  const resource = cache.getKey(resourceName)
+app.get('/:shortcode', async (req, res, next) => {
+  const shortcode = get(req, 'params.shortcode')
+  const resource = await db.collection('shortcodes').get(shortcode)
   if (!resource) return next()
 
   const redirect = get(resource, 'redirect', process.env.APP_WEBSITE)
-  const status = get(resource, 'status', 307)
+  const status = get(resource, 'status', 301)
   res.redirect(status, redirect)
 })
 
-app.post('/new', bodyParser.json(), (req, res) => {
+app.post('/new', bodyParser.json(), async (req, res) => {
   const redirect = get(req, 'body.redirect')
   if (!redirect) return res.sendStatus(400, 'No redirect URI provided')
 
@@ -36,15 +38,18 @@ app.post('/new', bodyParser.json(), (req, res) => {
   catch (e) { return res.sendStatus(400, e.message) }
 
   let status
-  try { status = parseInt(get(req, 'body.status', 307)) }
+  try { status = parseInt(get(req, 'body.status', 301)) }
   catch (e) { return res.sendStatus(400, e.message) }
-  if (!allowedStatuses.includes(status)) return res.sendStatus(400, 'Invalid status')
+
+  if (!allowedStatuses.includes(status)) {
+    return res.sendStatus(400, 'Invalid status')
+  }
 
   const shortcode = generateShortcode()
-  cache.setKey(shortcode, { redirect, status })
-  cache.save()
+  const record = await db.collection('shortcodes')
+    .set(shortcode, { redirect, status })
 
-  res.json({ shortcode, redirect, status })
+  res.json(record)
 })
 
 app.use('*', (req, res) => {
