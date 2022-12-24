@@ -81,7 +81,7 @@
 
         xhr.addEventListener('load', () => {
           e.target.reset();
-          var responseBody = JSON.parse(xhr.response)
+          var responseBody = JSON.parse(xhr.response);
           alert('Your new link is <%=appRoot%>/' + responseBody.shortcode);
         });
 
