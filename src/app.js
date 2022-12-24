@@ -53,17 +53,17 @@ const authenticationMiddleware = (req, res, next) => {
 // CREATE
 app.post('/_new', bodyParser.json(), async (req, res) => {
   const redirect = get(req, 'body.redirect')
-  if (!redirect) return res.sendStatus(400, 'No redirect URI provided')
+  if (!redirect) return res.status(400).send('No redirect URI provided')
 
   try { new URL(redirect) }
-  catch (e) { return res.sendStatus(400, e.message) }
+  catch (e) { return res.status(400).send(e.message) }
 
   let status
   try { status = parseInt(get(req, 'body.status', 301)) }
-  catch (e) { return res.sendStatus(400, e.message) }
+  catch (e) { return res.status(400).send(e.message) }
 
   if (!allowedStatuses.includes(status)) {
-    return res.sendStatus(400, 'Invalid status')
+    return res.status(400).send('Invalid status')
   }
 
   const shortcode = await generateShortcode()
@@ -105,12 +105,14 @@ app.use('*', (req, res) => {
   const markdownTemplate = fs.readFileSync(markdownTemplatePath, 'utf8')
 
   const markdown = ejs.render(markdownTemplate, {
-    website: process.env.WEBSITE,
-    appRoot: `${req.protocol}://${req.get('host')}`
+    appRoot: `${req.protocol}://${req.get('host')}`,
+    website: process.env.WEBSITE
   })
 
-  res.render('index', {
+  res.render('index.html.ejs', {
+    appRoot: `${req.protocol}://${req.get('host')}`,
     website: process.env.WEBSITE,
+    statuses: allowedStatuses,
     htmlContent: marked.parse(markdown)
   })
 })
