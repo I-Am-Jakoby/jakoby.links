@@ -80,12 +80,11 @@ app.delete('/:shortcode', authenticationMiddleware, async (req, res) => {
 app.use('/:shortcode', async (req, res, next) => {
   const shortcode = get(req, 'params.shortcode')
 
-  let record
-  try { record = await shortcodes.get(shortcode) }
-  catch (e) { return next() }
-
-  const { status, redirect } = formatShortcodeRecord(record)
-  res.redirect(status, redirect)
+  try {
+    const record = await shortcodes.get(shortcode)
+    const { status, redirect } = formatShortcodeRecord(record)
+    res.redirect(status, redirect)
+  } catch (e) { return next() }
 })
 
 // Catch-all
