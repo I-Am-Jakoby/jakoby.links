@@ -104,19 +104,24 @@ app.use('/:shortcode', async (req, res, next) => {
 
 // Catch-all
 app.use('*', (req, res) => {
-  const markdownTemplatePath = path.resolve(__dirname, '..', 'views', 'index.md.ejs')
-  const markdownTemplate = fs.readFileSync(markdownTemplatePath, 'utf8')
+  const ejsParams = {
+    appRoot: `${req.get('protocol')}//${req.get('host')}`,
+    website: process.env.WEBSITE,
+    statuses: allowedStatuses
+  }
 
-  const markdown = ejs.render(markdownTemplate, {
-    appRoot: `//${req.get('host')}`,
-    website: process.env.WEBSITE
-  })
+  const apiTemplatePath = path.resolve(__dirname, '..', 'views', 'api.md.ejs')
+  const apiTemplate = fs.readFileSync(apiTemplatePath, 'utf8')
+  const apiMarkdown = ejs.render(apiTemplate, ejsParams)
+
+  const headerTemplatePath = path.resolve(__dirname, '..', 'views', 'header.md.ejs')
+  const headerTemplate = fs.readFileSync(headerTemplatePath, 'utf8')
+  const headerMarkdown = ejs.render(headerTemplate, ejsParams)
 
   res.render('index.html.ejs', {
-    appRoot: `//${req.get('host')}`,
-    website: process.env.WEBSITE,
-    statuses: allowedStatuses,
-    htmlContent: marked.parse(markdown)
+    ...ejsParams,
+    bodyContent: marked.parse(apiMarkdown),
+    headerContent: marked.parse(headerMarkdown)
   })
 })
 
