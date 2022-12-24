@@ -61,7 +61,8 @@ app.post('/_new', bodyParser.json(), async (req, res) => {
 // READ
 app.get('/_list', authenticationMiddleware, async (req, res) => {
   const { results } = await shortcodes.list(Infinity)
-  res.json(results.map(formatShortcodeRecord))
+  const records = await Promise.all(results.map(({ key }) => shortcodes.get(key)))
+  res.json(records.map(formatShortcodeRecord))
 })
 
 // DELETE
@@ -69,18 +70,15 @@ app.delete('/:shortcode', authenticationMiddleware, async (req, res) => {
   const shortcode = get(req, 'params.shortcode')
   const record = await shortcodes.get(shortcode)
   if (!record) return res.sendStatus(404)
-
   try { await shortcodes.delete(shortcode) }
   catch (e) { res.sendStatus(500, e.message) }
-
   return res.sendStatus(200)
 })
 
 // READ
 app.use('/:shortcode', async (req, res, next) => {
-  const shortcode = get(req, 'params.shortcode')
-
   try {
+    const shortcode = get(req, 'params.shortcode')
     const record = await shortcodes.get(shortcode)
     const { status, redirect } = formatShortcodeRecord(record)
     res.redirect(status, redirect)
