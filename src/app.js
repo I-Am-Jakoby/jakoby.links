@@ -7,7 +7,6 @@ const bodyParser = require('body-parser')
 const Chance = require('chance')
 
 const app = express()
-const lootDir = path.resolve(__dirname, '..', 'loot')
 const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
