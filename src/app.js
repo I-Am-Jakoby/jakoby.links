@@ -16,6 +16,23 @@ const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 // use EJS as our templating engine
 app.set('view engine', 'ejs')
 
+// Configure marked like we want it
+marked.setOptions({
+  // renderer: new marked.Renderer(),
+  highlight: function(code, lang) {
+    const hljs = require('highlight.js');
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  },
+  langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+  // pedantic: false,
+  gfm: true,
+  // breaks: false,
+  // sanitize: false,
+  // smartypants: false,
+  // xhtml: false
+})
+
 // Algorithm for generating a new shortcode
 const generateShortcode = async (length = 4) => {
   const shortcode = (new Chance()).word({ length })
