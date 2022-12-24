@@ -32,11 +32,9 @@ dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
                                `             '
 
 # Create a new redirect
-$ <code>
-curl -X POST \
-  --data '{ "redirect": "<%=website%>", "status": 301 }' \
-  <%= appRoot %>/_new
-</code>
+$ <code>curl -X POST \
+    --data '{ "redirect": "<%=website%>", "status": 301 }' \
+    <%= appRoot %>/_new</code>
 > { "redirect": "<%=website%>", "status": 301, "shortcode": "jkby" }
 
 # Use a redirect
