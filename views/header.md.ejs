@@ -21,33 +21,3 @@ dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
                               `b  `       '  d'
                                `             '
 ```
-
-# Simple Shortcode Service
-
-## Create a new redirect
-
-### Command
-```bash
-curl -X POST \
-  --data '{ "redirect": "<%=website%>", "status": 301 }' \
-  <%= appRoot %>/_new
-```
-
-### Output
-```json
-{ "redirect": "<%=website%>", "status": 301, "shortcode": "jkby" }
-```
-
-## Use a redirect
-
-### Command(s)
-```bash
-curl -X POST <%= appRoot %>/jkby
-curl -X GET <%= appRoot %>/jkby
-curl -X PUT <%= appRoot %>/jkby
-curl -X PATCH <%= appRoot %>/jkby
-```
-### Output
-```
-Permanent Redirect to <%=website%>
-```

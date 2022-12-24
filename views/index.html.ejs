@@ -9,8 +9,18 @@
 
   <body class="container my-5">
 
+    <div class="my-5 d-flex justify-content-center align-items-center">
+      <div class="card">
+        <div class="card-body">
+          <article class="markdown-body p-3">
+            <%-headerContent%>
+          </article>
+        </div>
+      </div>
+    </div>
+
     <form action="<%=appRoot%>/_new" method="post" id="new">
-      <div class="card my-5 col col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
+      <div class="card">
         <div class="card-body">
           <div class="card-header">
             <h5 class="card-title">Create Shortcode</h5>
@@ -42,7 +52,7 @@
       <div class="card">
         <div class="card-body">
           <article class="markdown-body p-3">
-            <%-htmlContent%>
+            <%-bodyContent%>
           </article>
         </div>
 
@@ -50,30 +60,13 @@
           <a href="<%=website%>" target="_blank">
             <small><%=website%></small>
           </a>
-          <small style="font-size:0.001em;">
-            what are you looking for?
-          </small>
         </div>
       </div>
     </div>
 
-    <div class="modal fade in" id="successmodal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            ...
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <small style="font-size:0.001em;">
+      what are you looking for?
+    </small>
 
     <script type="text/javascript">
       document.getElementById('new').addEventListener('submit', function (e) {
@@ -88,7 +81,7 @@
 
         xhr.addEventListener('load', () => {
           e.target.reset();
-          var responseBody = JSON.parse(xhr.response)
+          var responseBody = JSON.parse(xhr.response);
           alert('Your new link is <%=appRoot%>/' + responseBody.shortcode);
         });
 
