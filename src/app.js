@@ -15,16 +15,9 @@ app.set('view engine', 'ejs')
 
 // Algorithm for generating a new shortcode
 const generateShortcode = async (length = 4) => {
-  // Generate a new random word
   const shortcode = (new Chance()).word({ length })
-
-  // Check to see if there's an existing shortcode with this name
   const existingShortcode = await shortcodes.get(shortcode)
-
-  // No existing shortcode? Great!
   if (!existingShortcode) return shortcode
-
-  // Otherwise, try again
   return await generateShortcode(length + 1)
 }
 
