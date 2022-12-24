@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cyborg/bootstrap.min.css" integrity="sha512-6JM8AUNiR0PhS+P/orbIggnQlkVEG7fUoO6ve7XWNGGGL0mOfLPSYuBo4/31Ig5KiC1T9Ep5yw8R12E2qaI2hQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-dark.css" integrity="sha512-q0UqxA0Ka1VxVBMFJoNfTVBYFWXqkNeF1N6WZPyLNULkF9YdpAuS/dqsN3/ClxBUzHJGrrkgLJFUlzFgXunXDQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/base16/monokai.min.css" integrity="sha512-FjOA1AU65qMR37zWdK/Z9Ct7kZE+LbRijMCoWYtbbw0mTuAzh+h2x0doBM7X2r3N98Wn/f1HyqSB+o3pavmZOQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+
+  <body class="container my-5">
+
+    <form action="/_new" method="post" id="new">
+      <div class="card my-5 col col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
+        <div class="card-body">
+          <div class="card-header">
+            <h5 class="card-title">Create Shortcode</h5>
+          </div>
+
+          <div class="card-body row">
+            <div class="col-8">
+              <input class="form-control" type="url" name="redirect" placeholder="Target URI" aria-label="Target URI" />
+            </div>
+            <div class="col-4">
+              <select class="form-select" name="status" placeholder="Status code" aria-label="Status code">
+                <% statuses.forEach((status) => { %>
+                <option value="<%=status%>" aria-label="<%=status%>" <%-(status === 301) ? 'selected' : ''%>>
+                  <%=status%>
+                </option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+
+          <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="my-5 d-flex justify-content-center align-items-center">
+      <div class="card">
+        <div class="card-body">
+          <article class="markdown-body p-3">
+            <%-htmlContent%>
+          </article>
+        </div>
+
+        <div class="card-footer text-center">
+          <a href="<%=website%>" target="_blank">
+            <small><%=website%></small>
+          </a>
+          <small style="font-size:0.001em;">
+            what are you looking for?
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade in" id="successmodal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      document.getElementById('new').addEventListener('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var formData = new FormData(e.target);
+        var formObject = {};
+        for (var pair of formData.entries()) formObject[pair[0]] = pair[1];
+
+        const xhr = new XMLHttpRequest();
+
+        xhr.addEventListener('load', () => {
+          e.target.reset();
+          var responseBody = JSON.parse(xhr.response)
+          alert('Your new link is <%=appRoot%>/' + responseBody.shortcode);
+        });
+
+        xhr.open("POST", '<%=appRoot%>/_new');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(formObject));
+      });
+    </script>
+
+  </body>
+</html>
