@@ -1,8 +1,11 @@
 const db = require('@cyclic.sh/dynamodb')
+const fs = require('fs')
+const ejs = require('ejs')
 const get = require('lodash/get')
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
+const { marked } = require('marked')
 
 const Chance = require('chance')
 
@@ -87,11 +90,20 @@ app.use('/:shortcode', async (req, res, next) => {
 
 // Catch-all
 app.use('*', (req, res) => {
-  res.render('index', {
+  const markdownTemplatePath = path.resolve(__dirname, '..', 'views', 'index.md.ejs')
+  const markdownTemplate = fs.readFileSync(markdownTemplatePath, 'utf8')
+
+  const markdown = ejs.render(markdownTemplate, {
     website: process.env.WEBSITE,
     appRoot: `${req.protocol}://${req.get('host')}`
   })
+
+  res.render('index', {
+    website: process.env.WEBSITE,
+    htmlContent: marked.parse(markdown)
+  })
 })
+
 
 // Start service
 app.listen(process.env.PORT || 3000)

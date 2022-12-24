@@ -3,60 +3,24 @@
   <head>
     <title></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cyborg/bootstrap.min.css" integrity="sha512-6JM8AUNiR0PhS+P/orbIggnQlkVEG7fUoO6ve7XWNGGGL0mOfLPSYuBo4/31Ig5KiC1T9Ep5yw8R12E2qaI2hQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-dark.css" integrity="sha512-q0UqxA0Ka1VxVBMFJoNfTVBYFWXqkNeF1N6WZPyLNULkF9YdpAuS/dqsN3/ClxBUzHJGrrkgLJFUlzFgXunXDQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   </head>
 
   <body class="container d-flex justify-content-center align-items-center">
     <div class="card my-3">
       <div class="card-body">
-        <pre class="border bg-body p-3 m-0">
-          .                                                      .
-        .n                   .                 .                  n.
-  .   .dP                  dP                   9b                 9b.    .
- 4    qXb         .       dX                     Xb       .        dXp     t
-dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
-9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP
- 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP
-  `9XXXXXXXXXXXXXXXXXXXXX'~   ~`OOO8b   d8OOO'~   ~`XXXXXXXXXXXXXXXXXXXXXP'
-    `9XXXXXXXXXXXP' `9XX'   DIE    `98v8P'  HUMAN   `XXP' `9XXXXXXXXXXXP'
-        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~
-                        )b.  .dbo.dP'`v'`9b.odb.  .dX(
-                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.
-                     dXXXXXXXXXXXP'   .   `9XXXXXXXXXXXb
-                    dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb
-                    9XXb'   `XXXXXb.dX|Xb.dXXXXX'   `dXXP
-                     `'      9XXXXXX(   )XXXXXXP      `'
-                              XXXX X.`v'.X XXXX
-                              XP^X'`b   d'`X^XX
-                              X. 9  `   '  P )X
-                              `b  `       '  d'
-                               `             '
-
-# Create a new redirect
-$ <code>curl -X POST \
-    --data '{ "redirect": "<%=website%>", "status": 301 }' \
-    <%= appRoot %>/_new</code>
-> { "redirect": "<%=website%>", "status": 301, "shortcode": "jkby" }
-
-# Use a redirect
-$ <code>curl -X POST <%= appRoot %>/jkby</code>
-> Permanent Redirect to <%=website%>
-
-$ <code>curl -X GET <%= appRoot %>/jkby</code>
-> Permanent Redirect to <%=website%>
-
-$ <code>curl -X PUT <%= appRoot %>/jkby</code>
-> Permanent Redirect to <%=website%>
-
-$ <code>curl -X PATCH <%= appRoot %>/jkby</code>
-> Permanent Redirect to <%=website%>
-        </pre>
+        <article class="markdown-body p-3">
+          <%- htmlContent %>
+        </article>
       </div>
       <div class="card-footer text-center">
         <a href="<%= website %>" target="_blank">
           <small><%= website %></small>
         </a>
+        <small style="font-size:0.001em;">
+          what are you looking for?
+        </small>
       </div>
     </div>
   </body>
-
 </html>
