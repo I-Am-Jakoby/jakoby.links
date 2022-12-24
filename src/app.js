@@ -51,26 +51,29 @@ const authenticationMiddleware = (req, res, next) => {
 }
 
 // CREATE
-app.post('/_new', bodyParser.json(), async (req, res) => {
-  const redirect = get(req, 'body.redirect')
-  if (!redirect) return res.status(400).send('No redirect URI provided')
+app.post('/_new',
+  bodyParser.urlencoded({ extended: false }),
+  bodyParser.json(),
+  async (req, res) => {
+    const redirect = get(req, 'body.redirect')
+    if (!redirect) return res.status(400).send('No redirect URI provided')
 
-  try { new URL(redirect) }
-  catch (e) { return res.status(400).send(e.message) }
+    try { new URL(redirect) }
+    catch (e) { return res.status(400).send(e.message) }
 
-  let status
-  try { status = parseInt(get(req, 'body.status', 301)) }
-  catch (e) { return res.status(400).send(e.message) }
+    let status
+    try { status = parseInt(get(req, 'body.status', 301)) }
+    catch (e) { return res.status(400).send(e.message) }
 
-  if (!allowedStatuses.includes(status)) {
-    return res.status(400).send('Invalid status')
-  }
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).send('Invalid status')
+    }
 
-  const shortcode = await generateShortcode()
-  await shortcodes.set(shortcode, { redirect, status })
-  const record = await shortcodes.get(shortcode)
-  res.json(formatShortcodeRecord(record))
-})
+    const shortcode = await generateShortcode()
+    await shortcodes.set(shortcode, { redirect, status })
+    const record = await shortcodes.get(shortcode)
+    res.json(formatShortcodeRecord(record))
+  })
 
 // READ
 app.get('/_list', authenticationMiddleware, async (req, res) => {
