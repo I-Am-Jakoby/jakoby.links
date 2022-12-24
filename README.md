@@ -3,7 +3,8 @@
 1. Fork this repo
 1. Sign up with [Cyclic.sh](https://www.cyclic.sh/) & grant access to your fork
 1. Navigate to https://app.cyclic.sh/
-1. Click the 🔧 wrench icon
+1. Create a deployment for your fork.
+1. Click the 🔧 wrench icon for your fork deployment 
 1. Click the Data/Storage tab, and copy the `Table Name` from the `AWS DynamoDB` section
 1. Click the Variables tab
 1. Enter your website url for variable `WEBSITE`
