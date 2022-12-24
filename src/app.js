@@ -108,12 +108,12 @@ app.use('*', (req, res) => {
   const markdownTemplate = fs.readFileSync(markdownTemplatePath, 'utf8')
 
   const markdown = ejs.render(markdownTemplate, {
-    appRoot: `${req.protocol}://${req.get('host')}`,
+    appRoot: `//${req.get('host')}`,
     website: process.env.WEBSITE
   })
 
   res.render('index.html.ejs', {
-    appRoot: `${req.protocol}://${req.get('host')}`,
+    appRoot: `//${req.get('host')}`,
     website: process.env.WEBSITE,
     statuses: allowedStatuses,
     htmlContent: marked.parse(markdown)
