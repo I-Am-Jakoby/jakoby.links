@@ -31,16 +31,22 @@ dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
                               `b  `       '  d'
                                `             '
 
-# Step 1
-> HTTP POST /_new { "redirect": "[url]", "status": 301 }
-< { "shortcode": "[code]", "redirect": "[url]", "status": 301 }
+# Create a new redirect
+$ <code>curl --data '{ "redirect": "[url]", "status": 301 }' <%= appRoot %>/_new</code>
+> { "redirect": "[url]", "status": 301, "shortcode": "jkby" }
 
-# Step 2
-> HTTP POST|GET|PATCH|PUT|DELETE /[code]
-< HTTP 301 [url]
+# Use a redirect
+$ <code>curl -X POST <%= appRoot %>/jkby</code>
+> Permanent Redirect to [url]
 
-# Step 3
-> Profit?
+$ <code>curl -X GET <%= appRoot %>/jkby</code>
+> Permanent Redirect to [url]
+
+$ <code>curl -X PUT <%= appRoot %>/jkby</code>
+> Permanent Redirect to [url]
+
+$ <code>curl -X PATCH <%= appRoot %>/jkby</code>
+> Permanent Redirect to [url]
         </pre>
       </div>
       <div class="card-footer text-center">
