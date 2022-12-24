@@ -15,7 +15,7 @@ const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 app.set('view engine', 'ejs')
 
 // Algorithm for generating a new shortcode
-const generateShortcode = async (length = 1) => {
+const generateShortcode = async (length = 4) => {
   // Generate a new random word
   const shortcode = (new Chance()).word({ length })
 
@@ -35,6 +35,14 @@ const formatShortcodeRecord = shortcodeRecord => ({
   redirect: get(shortcodeRecord, 'props.redirect', process.env.WEBSITE),
   shortcode: get(shortcodeRecord, 'key')
 })
+
+// Add some authentication
+const authenticationMiddleware = (req, res, next) => {
+  const passwordHeader = req.get('Authorization')
+  const [ _, password ] = passwordHeader.split(' ')
+  if (password === process.env.PASSWORD) return next()
+  return res.sendStatus(401)
+}
 
 // CREATE
 app.post('/_new', bodyParser.json(), async (req, res) => {
@@ -59,9 +67,22 @@ app.post('/_new', bodyParser.json(), async (req, res) => {
 })
 
 // READ
-// app.get('/_list', (req, res) => {
-//
-// })
+app.get('/_list', authenticationMiddleware, async (req, res) => {
+  const { results } = await shortcodes.list(Infinity)
+  res.json(results.map(formatShortcodeRecord))
+})
+
+// DELETE
+app.delete('/:shortcode', authenticationMiddleware, async (req, res) => {
+  const shortcode = get(req, 'params.shortcode')
+  const record = await shortcodes.get(shortcode)
+  if (!record) return res.sendStatus(404)
+
+  try { await shortcodes.delete(shortcode) }
+  catch (e) { res.sendStatus(500, e.message) }
+
+  return res.sendStatus(200)
+})
 
 // READ
 app.use('/:shortcode', async (req, res, next) => {
@@ -73,11 +94,6 @@ app.use('/:shortcode', async (req, res, next) => {
   const { status, redirect } = formatShortcodeRecord(record)
   res.redirect(status, redirect)
 })
-
-// DELETE
-// app.delete('/:shortcode', async (req, res) => {
-//
-// })
 
 // Catch-all
 app.use('*', (req, res) => {
