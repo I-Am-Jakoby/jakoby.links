@@ -13,6 +13,11 @@ const app = express()
 const shortcodes = db.collection('shortcodes')
 const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 
+const appPort = get(process, 'env.PORT', 3000)
+const appWebsite = get(process, 'env.WEBSITE', 'https://localhost/')
+const appProtocol = get(process, 'env.PROTOCOL', 'https')
+const appPassword = get(process, 'env.PASSWORD', 'iamjakoby')
+
 // use EJS as our templating engine
 app.set('view engine', 'ejs')
 
@@ -38,7 +43,7 @@ const generateShortcode = async (length = 4) => {
 // Output formatting for shortcode records
 const formatShortcodeRecord = shortcodeRecord => ({
   status: get(shortcodeRecord, 'props.status', 301),
-  redirect: get(shortcodeRecord, 'props.redirect', process.env.WEBSITE),
+  redirect: get(shortcodeRecord, 'props.redirect', appWebsite),
   shortcode: get(shortcodeRecord, 'key')
 })
 
@@ -46,7 +51,7 @@ const formatShortcodeRecord = shortcodeRecord => ({
 const authenticationMiddleware = (req, res, next) => {
   const passwordHeader = req.get('Authorization')
   const [ _, password ] = passwordHeader.split(' ')
-  if (password === process.env.PASSWORD) return next()
+  if (password === appPassword) return next()
   return res.sendStatus(401)
 }
 
@@ -105,8 +110,8 @@ app.use('/:shortcode', async (req, res, next) => {
 // Catch-all
 app.use('*', (req, res) => {
   const ejsParams = {
-    appRoot: `${req.get('protocol')}//${req.get('host')}`,
-    website: process.env.WEBSITE,
+    appRoot: `${appProtocol}://${req.get('host')}`,
+    website: appWebsite,
     statuses: allowedStatuses
   }
 
@@ -125,6 +130,5 @@ app.use('*', (req, res) => {
   })
 })
 
-
 // Start service
-app.listen(process.env.PORT || 3000)
+app.listen(appPort)
