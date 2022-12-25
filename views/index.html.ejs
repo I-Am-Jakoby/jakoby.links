@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cyborg/bootstrap.min.css" integrity="sha512-6JM8AUNiR0PhS+P/orbIggnQlkVEG7fUoO6ve7XWNGGGL0mOfLPSYuBo4/31Ig5KiC1T9Ep5yw8R12E2qaI2hQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-dark.css" integrity="sha512-q0UqxA0Ka1VxVBMFJoNfTVBYFWXqkNeF1N6WZPyLNULkF9YdpAuS/dqsN3/ClxBUzHJGrrkgLJFUlzFgXunXDQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/base16/monokai.min.css" integrity="sha512-FjOA1AU65qMR37zWdK/Z9Ct7kZE+LbRijMCoWYtbbw0mTuAzh+h2x0doBM7X2r3N98Wn/f1HyqSB+o3pavmZOQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
 
   <body class="container my-5">
@@ -28,12 +29,12 @@
 
           <div class="card-body row">
             <div class="col-8">
-              <input class="form-control" type="url" name="redirect" placeholder="Target URI" aria-label="Target URI" />
+              <input class="form-control" type="url" name="redirect" placeholder="Target URI" />
             </div>
             <div class="col-4">
-              <select class="form-select" name="status" placeholder="Status code" aria-label="Status code">
+              <select class="form-select" name="status" placeholder="Status code">
                 <% statuses.forEach((status) => { %>
-                <option value="<%=status%>" aria-label="<%=status%>" <%-(status === 301) ? 'selected' : ''%>>
+                <option value="<%=status%>" <%-(status === 301) ? 'selected' : ''%>>
                   <%=status%>
                 </option>
                 <% }) %>
@@ -42,7 +43,9 @@
           </div>
 
           <div class="card-footer text-end">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">
+              Submit
+            </button>
           </div>
         </div>
       </div>
@@ -58,8 +61,34 @@
 
         <div class="card-footer text-center">
           <a href="<%=website%>" target="_blank">
-            <small><%=website%></small>
+            <small>
+              <%=website%>
+            </small>
           </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="success_modal" class="modal modal-xl fade" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Your Shortcode URL:</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <h3>
+              <pre class="border p-3 m-0"><code id="success_modal_shortcode"></code></pre>
+            </h3>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-clipboard-action="copy" data-clipboard-target="#success_modal_shortcode">
+              Copy to Clipboard
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -68,23 +97,25 @@
       what are you looking for?
     </small>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js" integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script type="text/javascript">
+      new ClipboardJS('[data-clipboard-action]');
+      var successModal = new bootstrap.Modal('#success_modal', { keyboard: false });
+      var successModalShortcode = document.getElementById('success_modal_shortcode');
       document.getElementById('new').addEventListener('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();
-
         var formData = new FormData(e.target);
         var formObject = {};
         for (var pair of formData.entries()) formObject[pair[0]] = pair[1];
-
         const xhr = new XMLHttpRequest();
-
         xhr.addEventListener('load', () => {
           e.target.reset();
           var responseBody = JSON.parse(xhr.response);
-          alert('Your new link is <%=appRoot%>/' + responseBody.shortcode);
+          successModalShortcode.innerText = ('<%=appRoot%>/' + responseBody.shortcode);
+          successModal.show();
         });
-
         xhr.open("POST", '<%=appRoot%>/_new');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(formObject));
