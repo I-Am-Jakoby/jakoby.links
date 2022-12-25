@@ -59,8 +59,8 @@ const authenticationMiddleware = (req, res, next) => {
 
 // CREATE
 app.post('/_new',
-  bodyParser.urlencoded({ extended: false }),
   bodyParser.json(),
+  bodyParser.urlencoded({ extended: false }),
   async (req, res) => {
     const redirect = get(req, 'body.redirect')
     if (!redirect) return res.status(400).send('No redirect URI provided')
@@ -123,20 +123,23 @@ app.delete('/:shortcode', authenticationMiddleware, async (req, res) => {
 })
 
 // Redirect
-app.use('/:shortcode', async (req, res, next) => {
-  try {
-    const shortcode = get(req, 'params.shortcode')
-    const shortcodeRecord = await shortcodes.get(shortcode)
-    if (!shortcodeRecord) return next()
+app.use('/:shortcode',
+  bodyParser.json(),
+  bodyParser.urlencoded({ extended: false }),
+  async (req, res, next) => {
+    try {
+      const shortcode = get(req, 'params.shortcode')
+      const shortcodeRecord = await shortcodes.get(shortcode)
+      if (!shortcodeRecord) return next()
 
-    const { status, redirect } = formatShortcodeRecord(shortcodeRecord)
-    const { protocol, ip, method, baseUrl, path, params, query, body } = req
-    const invocationKey = `${Date.now()} ${ip} ${method} ${shortcode}`
-    await shortcodeInvocations.set(invocationKey, { shortcode, protocol, ip, method, baseUrl, path, params, query, body })
+      const { status, redirect } = formatShortcodeRecord(shortcodeRecord)
+      const { protocol, ip, method, baseUrl, path, params, query, body } = req
+      const invocationKey = `${Date.now()} ${ip} ${method} ${shortcode}`
+      await shortcodeInvocations.set(invocationKey, { shortcode, protocol, ip, method, baseUrl, path, params, query, body })
 
-    res.redirect(status, redirect)
-  } catch (e) { return next() }
-})
+      res.redirect(status, redirect)
+    } catch (e) { return next() }
+  })
 
 // Catch-all
 app.use('*', (req, res) => {
