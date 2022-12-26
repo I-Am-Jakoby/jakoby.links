@@ -11,8 +11,10 @@ const Chance = require('chance')
 
 const app = express()
 const shortcodes = db.collection('shortcodes')
-const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
+const shortcodeCreations = db.collection('shortcode_creations')
+const shortcodeInvocations = db.collection('shortcode_invocations')
 
+const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
 const appPort = get(process, 'env.PORT', 3000)
 const appWebsite = get(process, 'env.WEBSITE', 'https://localhost/')
 const appProtocol = get(process, 'env.PROTOCOL', 'https')
@@ -57,8 +59,8 @@ const authenticationMiddleware = (req, res, next) => {
 
 // CREATE
 app.post('/_new',
-  bodyParser.urlencoded({ extended: false }),
   bodyParser.json(),
+  bodyParser.urlencoded({ extended: false }),
   async (req, res) => {
     const redirect = get(req, 'body.redirect')
     if (!redirect) return res.status(400).send('No redirect URI provided')
@@ -75,37 +77,69 @@ app.post('/_new',
     }
 
     const shortcode = await generateShortcode()
+    const { protocol, ip, method, baseUrl, path, params, query, body } = req
+
     await shortcodes.set(shortcode, { redirect, status })
-    const record = await shortcodes.get(shortcode)
-    res.json(formatShortcodeRecord(record))
+    await shortcodeCreations.set(shortcode, { protocol, ip, method, baseUrl, path, params, query, body })
+
+    const shortcodeRecord = await shortcodes.get(shortcode)
+    res.json(formatShortcodeRecord(shortcodeRecord))
   })
 
 // READ
 app.get('/_list', authenticationMiddleware, async (req, res) => {
   const { results } = await shortcodes.list(Infinity)
-  const records = await Promise.all(results.map(({ key }) => shortcodes.get(key)))
-  res.json(records.map(formatShortcodeRecord))
+  const shortcodeRecords = await Promise.all(results.map(({ key }) => shortcodes.get(key)))
+  res.json(shortcodeRecords.map(formatShortcodeRecord))
+})
+
+app.get('/:shortcode/_metadata', authenticationMiddleware, async (req, res) => {
+  try {
+    const shortcode = get(req, 'params.shortcode')
+    const shortcodeRecord = await shortcodes.get(shortcode)
+    if (!shortcodeRecord) return res.sendStatus(404)
+
+    const record = formatShortcodeRecord(shortcodeRecord)
+    const { props: creation } = await shortcodeCreations.get(shortcode)
+    const { results: invocationRecords } = await shortcodeInvocations.filter({ shortcode })
+    res.json({ record, creation, invocations: invocationRecords.map(({ props }) => props) })
+  } catch (e) {
+    res.sendStatus(500, e.message)
+  }
 })
 
 // DELETE
 app.delete('/:shortcode', authenticationMiddleware, async (req, res) => {
-  const shortcode = get(req, 'params.shortcode')
-  const record = await shortcodes.get(shortcode)
-  if (!record) return res.sendStatus(404)
-  try { await shortcodes.delete(shortcode) }
-  catch (e) { res.sendStatus(500, e.message) }
-  return res.sendStatus(200)
+  try {
+    const shortcode = get(req, 'params.shortcode')
+    const shortcodeRecord = await shortcodes.get(shortcode)
+    if (!shortcodeRecord) return res.sendStatus(404)
+
+    await shortcodes.delete(shortcode)
+    res.sendStatus(200)
+  } catch (e) {
+    res.sendStatus(500, e.message)
+  }
 })
 
 // Redirect
-app.use('/:shortcode', async (req, res, next) => {
-  try {
-    const shortcode = get(req, 'params.shortcode')
-    const record = await shortcodes.get(shortcode)
-    const { status, redirect } = formatShortcodeRecord(record)
-    res.redirect(status, redirect)
-  } catch (e) { return next() }
-})
+app.use('/:shortcode',
+  bodyParser.json(),
+  bodyParser.urlencoded({ extended: false }),
+  async (req, res, next) => {
+    try {
+      const shortcode = get(req, 'params.shortcode')
+      const shortcodeRecord = await shortcodes.get(shortcode)
+      if (!shortcodeRecord) return next()
+
+      const { status, redirect } = formatShortcodeRecord(shortcodeRecord)
+      const { protocol, ip, method, baseUrl, path, params, query, body } = req
+      const invocationKey = `${Date.now()} ${ip} ${method} ${shortcode}`
+      await shortcodeInvocations.set(invocationKey, { shortcode, protocol, ip, method, baseUrl, path, params, query, body })
+
+      res.redirect(status, redirect)
+    } catch (e) { return next() }
+  })
 
 // Catch-all
 app.use('*', (req, res) => {
