@@ -37,9 +37,9 @@
               <small class="float-end"><%= invocation.created %></small>
               <small><%= invocation.method %></small>
               <small><%= invocation.baseUrl %></small>
-              <pre class="border"><code class="language-json"><%= JSON.stringify(invocation.body) %></code></pre>
+              <pre><code class="language-json"><%= JSON.stringify(invocation.body) %></code></pre>
               <details role="button">
-                <pre class="border"><code class="language-json"><%= JSON.stringify(invocation, null, 2) %></code></pre>
+                <pre><code class="language-json"><%= JSON.stringify(invocation, null, 2) %></code></pre>
               </details>
             </li>
             <% }) %>
