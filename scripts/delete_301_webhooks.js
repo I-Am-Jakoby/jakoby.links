@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 
+require('dotenv').config()
 const axios = require('axios')
-
-// const appRoot = 'https://good-puce-salmon-fez.cyclic.app'
-// const appPass = 'iamnotjakoby'
-
-const appRoot = 'https://link.iamjakoby.com'
-const appPass = 'Iamjakobylinks3000!'
+const appRoot = process.env.DEPLOYMENT
+const appPass = process.env.PASSWORD
 
 const authParams = {
   headers: {

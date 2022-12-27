@@ -1,64 +1,30 @@
-const db = require('@cyclic.sh/dynamodb')
 const fs = require('fs')
 const ejs = require('ejs')
 const get = require('lodash/get')
 const path = require('path')
+const uuid = require('uuid')
+const axios = require('axios')
+const crypto = require('crypto')
 const express = require('express')
 const bodyParser = require('body-parser')
-const { marked } = require('marked')
 
-const Chance = require('chance')
+const {
+  marked,
+  shortcodes, shortcodeCreations, shortcodeInvocations,
+  allowedStatuses, appPort, appRoot, appWebsite, appNotifyHook,
+  generateShortcode, formatShortcodeRecord
+} = require('./lib')
 
 const app = express()
-const shortcodes = db.collection('shortcodes')
-const shortcodeCreations = db.collection('shortcode_creations')
-const shortcodeInvocations = db.collection('shortcode_invocations')
-
-const allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
-const appPort = get(process, 'env.PORT', 3000)
-const appWebsite = get(process, 'env.WEBSITE', 'https://localhost/')
-const appProtocol = get(process, 'env.PROTOCOL', 'https')
-const appPassword = get(process, 'env.PASSWORD', 'iamjakoby')
 
 // use EJS as our templating engine
 app.set('view engine', 'ejs')
 
-// Configure marked
-marked.setOptions({
-  gfm: true,
-  langPrefix: 'hljs language-',
-  highlight: (code, lang) => {
-    const hljs = require('highlight.js')
-    const language = hljs.getLanguage(lang) ? lang : 'plaintext'
-    return hljs.highlight(code, { language }).value
-  }
-})
-
-// Algorithm for generating a new shortcode
-const generateShortcode = async (length = 4) => {
-  const shortcode = (new Chance()).word({ length })
-  const existingShortcode = await shortcodes.get(shortcode)
-  if (!existingShortcode) return shortcode
-  return await generateShortcode(length + 1)
-}
-
-// Output formatting for shortcode records
-const formatShortcodeRecord = shortcodeRecord => ({
-  status: get(shortcodeRecord, 'props.status', 301),
-  redirect: get(shortcodeRecord, 'props.redirect', appWebsite),
-  shortcode: get(shortcodeRecord, 'key')
-})
-
-// Add some authentication
-const authenticationMiddleware = (req, res, next) => {
-  const passwordHeader = req.get('Authorization')
-  const [ _, password ] = passwordHeader.split(' ')
-  if (password === appPassword) return next()
-  return res.sendStatus(401)
-}
+// Add the admin router
+app.use('/admin', require('./admin'))
 
 // CREATE
-app.post('/_new',
+app.post('/',
   bodyParser.json(),
   bodyParser.urlencoded({ extended: false }),
   async (req, res) => {
@@ -77,50 +43,37 @@ app.post('/_new',
     }
 
     const shortcode = await generateShortcode()
-    const { protocol, ip, method, baseUrl, path, params, query, body } = req
+    const { protocol, method, path, baseUrl, params, query, body } = req
+    const ip = req.get('x-forwarded-for') || req.get('ip')
 
     await shortcodes.set(shortcode, { redirect, status })
-    await shortcodeCreations.set(shortcode, { protocol, ip, method, baseUrl, path, params, query, body })
+    await shortcodeCreations.set(shortcode, { shortcode, protocol, ip, method, path, baseUrl, params, query, body })
 
     const shortcodeRecord = await shortcodes.get(shortcode)
     res.json(formatShortcodeRecord(shortcodeRecord))
   })
 
-// READ
-app.get('/_list', authenticationMiddleware, async (req, res) => {
-  const { results } = await shortcodes.list(Infinity)
-  const shortcodeRecords = await Promise.all(results.map(({ key }) => shortcodes.get(key)))
-  res.json(shortcodeRecords.map(formatShortcodeRecord))
-})
-
-app.get('/:shortcode/_metadata', authenticationMiddleware, async (req, res) => {
-  try {
-    const shortcode = get(req, 'params.shortcode')
-    const shortcodeRecord = await shortcodes.get(shortcode)
-    if (!shortcodeRecord) return res.sendStatus(404)
-
-    const record = formatShortcodeRecord(shortcodeRecord)
-    const { props: creation } = await shortcodeCreations.get(shortcode)
-    const { results: invocationRecords } = await shortcodeInvocations.filter({ shortcode })
-    res.json({ record, creation, invocations: invocationRecords.map(({ props }) => props) })
-  } catch (e) {
-    res.sendStatus(500, e.message)
-  }
-})
-
-// DELETE
-app.delete('/:shortcode', authenticationMiddleware, async (req, res) => {
-  try {
-    const shortcode = get(req, 'params.shortcode')
-    const shortcodeRecord = await shortcodes.get(shortcode)
-    if (!shortcodeRecord) return res.sendStatus(404)
-
-    await shortcodes.delete(shortcode)
-    res.sendStatus(200)
-  } catch (e) {
-    res.sendStatus(500, e.message)
-  }
-})
+// Integrity check
+const indexTemplate = fs.readFileSync(path.resolve(__dirname, '..', 'views', 'index.html.ejs'), 'utf8')
+const integritiesMatcher = /integrity=\"(?!sha)([^\"]+)\"/gm
+const [ [ _, integrityCode ] ] = indexTemplate.matchAll(integritiesMatcher)
+const integrityCheck = crypto.createHash('sha512').update(integrityCode, 'utf8').digest('hex')
+app.use(`/flag/${integrityCheck}`,
+  bodyParser.json(),
+  bodyParser.urlencoded({ extended: false }),
+  (req, res) => {
+    const { method, baseUrl, query, body } = req
+    const ip = req.get('x-forwarded-for') || req.get('ip')
+    const content = JSON.stringify({ ip, method, baseUrl, query, body }, null, 2)
+    try { axios.post(appNotifyHook, { content: `\`\`\`json\n${content}\`\`\``, username: appRoot, ...body }) }
+    catch (e) { console.warn(e.message) }
+    res.json({
+      method: 'POST',
+      target: `/flag/${integrityCheck}`,
+      reference: 'https://gist.github.com/Birdie0/78ee79402a4301b1faf412ab5f1cdcf9',
+      body: { username: 'discord#1337', content: atob('VGVsbCB1cyB3aG8geW91IGFyZSwgbGVnZW5k') }
+    })
+  })
 
 // Redirect
 app.use('/:shortcode',
@@ -133,9 +86,10 @@ app.use('/:shortcode',
       if (!shortcodeRecord) return next()
 
       const { status, redirect } = formatShortcodeRecord(shortcodeRecord)
-      const { protocol, ip, method, baseUrl, path, params, query, body } = req
-      const invocationKey = `${Date.now()} ${ip} ${method} ${shortcode}`
-      await shortcodeInvocations.set(invocationKey, { shortcode, protocol, ip, method, baseUrl, path, params, query, body })
+      const { protocol, method, path, baseUrl, params, query, body } = req
+      const ip = req.get('x-forwarded-for') || req.get('ip')
+      const invocation = uuid.v4()
+      await shortcodeInvocations.set(invocation, { invocation, shortcode, protocol, ip, method, path, baseUrl, params, query, body })
 
       res.redirect(status, redirect)
     } catch (e) { return next() }
@@ -144,7 +98,7 @@ app.use('/:shortcode',
 // Catch-all
 app.use('*', (req, res) => {
   const ejsParams = {
-    appRoot: `${appProtocol}://${req.get('host')}`,
+    appRoot: appRoot,
     website: appWebsite,
     statuses: allowedStatuses
   }

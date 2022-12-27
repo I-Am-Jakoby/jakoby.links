@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cyborg/bootstrap.min.css" integrity="sha512-6JM8AUNiR0PhS+P/orbIggnQlkVEG7fUoO6ve7XWNGGGL0mOfLPSYuBo4/31Ig5KiC1T9Ep5yw8R12E2qaI2hQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" integrity="sha512-ade8vHOXH67Cm9z/U2vBpckPD1Enhdxl3N05ChXyFx5xikfqggrK4RrEele+VWY/iaZyfk7Bhk6CyZvlh7+5JQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+  <body class="py-5">
+    <div class="container">
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="/admin">
+              Index
+            </a>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="row">
+
+        <div class="col-12 col-md-6">
+          <h5>Shortcode</h5>
+          <%- include('shortcode-card.html.ejs', { appRoot, shortcode }) %>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <h5>Creation</h5>
+          <%- include('record-card.html.ejs', { record: JSON.stringify(creation, null, 2) }) %>
+        </div>
+
+        <div class="col-12">
+          <h5>Invocations</h5>
+          <ul class="list-group">
+            <% invocations.forEach(invocation => { %>
+            <li class="list-group-item">
+              <small class="float-end"><%= invocation.created %></small>
+              <small><%= invocation.method %></small>
+              <small><%= invocation.baseUrl %></small>
+              <pre class="border"><code class="language-json"><%= JSON.stringify(invocation.body) %></code></pre>
+              <details role="button">
+                <pre class="border"><code class="language-json"><%= JSON.stringify(invocation, null, 2) %></code></pre>
+              </details>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" integrity="sha512-bgHRAiTjGrzHzLyKOnpFvaEpGzJet3z4tZnXGjpsCcqOnAH6VGUx9frc5bcIhKTVLEiCO6vEhNAgx5jtLUYrfA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>hljs.highlightAll();</script>
+  </body>
+</html>
