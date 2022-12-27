@@ -1,23 +1,65 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cyborg/bootstrap.min.css" integrity="sha512-6JM8AUNiR0PhS+P/orbIggnQlkVEG7fUoO6ve7XWNGGGL0mOfLPSYuBo4/31Ig5KiC1T9Ep5yw8R12E2qaI2hQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" integrity="sha512-ade8vHOXH67Cm9z/U2vBpckPD1Enhdxl3N05ChXyFx5xikfqggrK4RrEele+VWY/iaZyfk7Bhk6CyZvlh7+5JQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  </head>
   <body class="py-5">
     <div class="container">
-      <div class="row g-3">
-        <% shortcodes.forEach(shortcode => { %>
-        <div class="col-12 col-md-6 col-lg-4">
-          <%- include('shortcode-card.html.ejs', { appRoot, shortcode }) %>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active">Index</li>
+        </ol>
+      </nav>
+
+      <div class="my-5">
+        <h5>Tools</h5>
+        <div class="card">
+          <div class="card-footer">
+            <div class="btn-toolbar d-flex flex-row-reverse">
+              <div class="btn-group">
+                <form id="cleanup_301_webhooks" action="/admin/api/cleanup_301_webhooks" method="post">
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    Cleanup 301 Webhooks
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
-        <% }) %>
+      </div>
+      <div class="my-5">
+        <h5>Shortcodes</h5>
+        <div class="row g-3">
+          <% shortcodes.forEach(shortcode => { %>
+          <div class="col-12 col-md-6 col-lg-4">
+            <%- include('shortcode-card.html.ejs', { appRoot, shortcode }) %>
+          </div>
+          <% }) %>
+        </div>
       </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" integrity="sha512-bgHRAiTjGrzHzLyKOnpFvaEpGzJet3z4tZnXGjpsCcqOnAH6VGUx9frc5bcIhKTVLEiCO6vEhNAgx5jtLUYrfA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <div id="cleanup_301_webhooks_modal" class="modal modal-xl fade" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cleanup 301 Result</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <pre id="cleanup_301_webhooks_modal_content"></pre>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%-include('../_hljs.html.ejs')%>
+    <%-include('../_bootstrap.html.ejs')%>
+
     <script type="text/javascript">
-      hljs.highlightAll();
       var deleteButtons = document.querySelectorAll("[data-delete]");
       deleteButtons.forEach(function (deleteButton) {
         deleteButton.addEventListener("click", function (e) {
@@ -27,6 +69,23 @@
           xhr.open("DELETE", "<%=appRoot%>/admin/api/shortcodes/" + deleteId);
           xhr.send();
         });
+      });
+
+      var successModal = new bootstrap.Modal('#cleanup_301_webhooks_modal', { keyboard: false });
+      var successModalBody = document.getElementById('cleanup_301_webhooks_modal_content');
+      document.getElementById('cleanup_301_webhooks').addEventListener('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", () => {
+          var actions = JSON.parse(xhr.response);
+          successModalBody.innerText = actions.map(({ action, shortcode }) => {
+            return `${action} ${shortcode}`
+          }).join('\n');
+          successModal.show();
+        });
+        xhr.open("POST", "<%=appRoot%>/admin/api/cleanup_301_webhooks");
+        xhr.send();
       });
     </script>
   </body>

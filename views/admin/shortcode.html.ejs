@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/cyborg/bootstrap.min.css" integrity="sha512-6JM8AUNiR0PhS+P/orbIggnQlkVEG7fUoO6ve7XWNGGGL0mOfLPSYuBo4/31Ig5KiC1T9Ep5yw8R12E2qaI2hQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" integrity="sha512-ade8vHOXH67Cm9z/U2vBpckPD1Enhdxl3N05ChXyFx5xikfqggrK4RrEele+VWY/iaZyfk7Bhk6CyZvlh7+5JQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  </head>
   <body class="py-5">
     <div class="container">
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-            <a href="/admin">
-              Index
-            </a>
-          </li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/admin">Index</a></li>
+          <li class="breadcrumb-item active"><%=shortcode._key%></li>
         </ol>
       </nav>
 
@@ -47,7 +40,7 @@
         </div>
       </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" integrity="sha512-bgHRAiTjGrzHzLyKOnpFvaEpGzJet3z4tZnXGjpsCcqOnAH6VGUx9frc5bcIhKTVLEiCO6vEhNAgx5jtLUYrfA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>hljs.highlightAll();</script>
+    <%-include('../_hljs.html.ejs')%>
+    <%-include('../_bootstrap.html.ejs')%>
   </body>
 </html>
