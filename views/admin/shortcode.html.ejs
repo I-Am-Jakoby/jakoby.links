@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <%-include('../_head.html.ejs', { appVars })%>
+  </head>
   <body class="py-5">
     <div class="container">
       <nav>
@@ -14,7 +17,7 @@
 
         <div class="col-12 col-md-6">
           <h5>Shortcode</h5>
-          <%- include('shortcode-card.html.ejs', { appRoot, shortcode }) %>
+          <%- include('shortcode-card.html.ejs', { appVars, shortcode }) %>
         </div>
 
         <div class="col-12 col-md-6">
@@ -41,6 +44,5 @@
       </div>
     </div>
     <%-include('../_hljs.html.ejs')%>
-    <%-include('../_bootstrap.html.ejs')%>
   </body>
 </html>

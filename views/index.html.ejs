@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-dark.css" integrity="sha512-q0UqxA0Ka1VxVBMFJoNfTVBYFWXqkNeF1N6WZPyLNULkF9YdpAuS/dqsN3/ClxBUzHJGrrkgLJFUlzFgXunXDQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script data-src="https://cdnjs.cloudflare.com/ajax/libs/hackercheck/1.33.7/3457323665.js" integrity="Y29uc29sZS5sb2coJyVjR0VUIC9mbGFnL3NoYTUxMihpbnRlZ3JpdHkpJywgJ2JhY2tncm91bmQ6ICNmZmY7IGNvbG9yOiAjZmZmJyk7" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <%- include('_head.html.ejs', { appVars }) %>
     <style type="text/css">
       .header.markdown-body { background: none; }
       .header.markdown-body pre { background: none; font-size:.3em; }
@@ -15,7 +12,7 @@
     <div class="my-5 d-flex justify-content-center align-items-center">
       <div class="header markdown-body user-select-none"><%-headerContent%></div>
     </div>
-    <form action="<%=appRoot%>/" method="post" id="new">
+    <form action="<%=appVars.root%>/" method="post" id="new">
       <div class="card">
         <div class="card-body">
           <div class="card-header">
@@ -28,7 +25,7 @@
             </div>
             <div class="col-4">
               <select class="form-select" name="status" placeholder="Status code">
-                <% statuses.forEach((status) => { %>
+                <% appVars.statuses.forEach((status) => { %>
                 <option value="<%=status%>" <%-(status === 301) ? 'selected' : ''%>>
                   <%=status%>
                 </option>
@@ -54,9 +51,9 @@
         </div>
 
         <div class="card-footer text-center">
-          <a href="<%=website%>" target="_blank">
+          <a href="<%=appVars.website%>" target="_blank">
             <small>
-              <%=website%>
+              <%=appVars.website%>
             </small>
           </a>
         </div>
@@ -85,10 +82,10 @@
         </div>
       </div>
     </div>
-
-    <%-include('_hljs.html.ejs')%>
-    <%-include('_bootstrap.html.ejs')%>
-
+    <%-include('_hljs.html.ejs', { appVars })%>
+    <%-include('_bootstrap.html.ejs', { appVars })%>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script data-src="https://cdnjs.cloudflare.com/ajax/libs/hackercheck/1.33.7/3457323665.js" integrity="Y29uc29sZS5sb2coJyVjR0VUIC9mbGFnL3NoYTUxMihpbnRlZ3JpdHkpJywgJ2JhY2tncm91bmQ6ICNmZmY7IGNvbG9yOiAjZmZmJyk7" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
       eval(atob(document.querySelector('script[data-src]').integrity));
       new ClipboardJS('[data-clipboard-action]');
@@ -104,10 +101,10 @@
         xhr.addEventListener('load', () => {
           e.target.reset();
           var responseBody = JSON.parse(xhr.response);
-          successModalShortcode.innerText = ('<%=appRoot%>/' + responseBody.shortcode);
+          successModalShortcode.innerText = ('<%=appVars.root%>/' + responseBody.shortcode);
           successModal.show();
         });
-        xhr.open("POST", '<%=appRoot%>/');
+        xhr.open("POST", '<%=appVars.root%>/');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(formObject));
       });

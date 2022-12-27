@@ -10,8 +10,15 @@ const bodyParser = require('body-parser')
 
 const {
   marked,
-  shortcodes, shortcodeCreations, shortcodeInvocations,
-  allowedStatuses, appPort, appRoot, appWebsite, appNotifyHook,
+  shortcodes,
+  shortcodeCreations,
+  shortcodeInvocations,
+  allowedStatuses,
+  appVars,
+  appPort,
+  appRoot,
+  appWebsite,
+  appNotifyHook,
   generateShortcode, formatShortcodeRecord
 } = require('./lib')
 
@@ -97,22 +104,16 @@ app.use('/:shortcode',
 
 // Catch-all
 app.use('*', (req, res) => {
-  const ejsParams = {
-    appRoot: appRoot,
-    website: appWebsite,
-    statuses: allowedStatuses
-  }
-
   const apiTemplatePath = path.resolve(__dirname, '..', 'views', 'api.md.ejs')
   const apiTemplate = fs.readFileSync(apiTemplatePath, 'utf8')
-  const apiMarkdown = ejs.render(apiTemplate, ejsParams)
+  const apiMarkdown = ejs.render(apiTemplate, { appVars })
 
   const headerTemplatePath = path.resolve(__dirname, '..', 'views', 'header.md.ejs')
   const headerTemplate = fs.readFileSync(headerTemplatePath, 'utf8')
-  const headerMarkdown = ejs.render(headerTemplate, ejsParams)
+  const headerMarkdown = ejs.render(headerTemplate, { appVars })
 
   res.render('index.html.ejs', {
-    ...ejsParams,
+    appVars,
     bodyContent: marked.parse(apiMarkdown),
     headerContent: marked.parse(headerMarkdown)
   })

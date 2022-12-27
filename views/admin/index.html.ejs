@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <%-include('../_head.html.ejs', { appVars })%>
+  </head>
   <body class="py-5">
     <div class="container">
       <nav>
@@ -30,7 +33,7 @@
         <div class="row g-3">
           <% shortcodes.forEach(shortcode => { %>
           <div class="col-12 col-md-6 col-lg-4">
-            <%- include('shortcode-card.html.ejs', { appRoot, shortcode }) %>
+            <%- include('shortcode-card.html.ejs', { appVars, shortcode }) %>
           </div>
           <% }) %>
         </div>
@@ -66,7 +69,7 @@
           var deleteId = e.target.dataset.delete;
           var xhr = new XMLHttpRequest();
           xhr.addEventListener("load", function () { window.location.reload() });
-          xhr.open("DELETE", "<%=appRoot%>/admin/api/shortcodes/" + deleteId);
+          xhr.open("DELETE", "<%=appVars.root%>/admin/api/shortcodes/" + deleteId);
           xhr.send();
         });
       });
@@ -84,7 +87,7 @@
           }).join('\n');
           successModal.show();
         });
-        xhr.open("POST", "<%=appRoot%>/admin/api/cleanup_301_webhooks");
+        xhr.open("POST", "<%=appVars.root%>/admin/api/cleanup_301_webhooks");
         xhr.send();
       });
     </script>
