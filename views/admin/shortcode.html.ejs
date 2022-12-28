@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%-include('../_head.html.ejs', { appVars })%>
+  </head>
+  <body class="py-5">
+    <div class="container">
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/admin">Index</a></li>
+          <li class="breadcrumb-item active"><%=shortcode._key%></li>
+        </ol>
+      </nav>
+
+      <div class="row">
+
+        <div class="col-12 col-md-6">
+          <h5>Shortcode</h5>
+          <%- include('shortcode-card.html.ejs', { appVars, shortcode }) %>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <h5>Creation</h5>
+          <%- include('record-card.html.ejs', { record: JSON.stringify(creation, null, 2) }) %>
+        </div>
+
+        <div class="col-12">
+          <h5>Invocations</h5>
+          <ul class="list-group">
+            <% invocations.forEach(invocation => { %>
+            <li class="list-group-item">
+              <small class="float-end"><%= invocation.created %></small>
+              <small><%= invocation.method %></small>
+              <small><%= invocation.baseUrl %></small>
+              <pre><code class="language-json"><%= JSON.stringify(invocation.body) %></code></pre>
+              <details role="button">
+                <pre><code class="language-json"><%= JSON.stringify(invocation, null, 2) %></code></pre>
+              </details>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <%-include('../_hljs.html.ejs')%>
+  </body>
+</html>

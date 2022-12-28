@@ -1,0 +1,20 @@
+<div class="card">
+  <div class="card-header">
+    <a class="card-title" href="<%=appVars.root%>/admin/shortcodes/<%=shortcode._key%>">
+      /<%=shortcode._key%>
+    </a>
+  </div>
+  <div class="card-body">
+    <dl class="m-0">
+      <dt>Redirect</dt>
+      <dd><pre class="text-wrap"><%=shortcode.redirect%></pre></dd>
+      <dt>Status</dt>
+      <dd><pre class="text-wrap"><%=shortcode.status%></pre></dd>
+    </dl>
+  </div>
+  <div class="card-footer text-end">
+    <button class="btn btn-sm btn-danger" data-delete="<%=shortcode._key%>">
+      Delete
+    </button>
+  </div>
+</div>
