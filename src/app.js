@@ -7,6 +7,7 @@ const axios = require('axios')
 const crypto = require('crypto')
 const express = require('express')
 const bodyParser = require('body-parser')
+const minifyHTML = require('express-minify-html')
 
 const {
   marked,
@@ -23,6 +24,29 @@ const {
 } = require('./lib')
 
 const app = express()
+
+// Minify html output
+app.use(minifyHTML({
+  override: true,
+  exception_url: false,
+  htmlMinifier: {
+    minifyJS: true,
+    minifyCSS: true,
+    minifyURLs: true,
+    sortClassName: true,
+    sortAttributes: true,
+    removeComments: true,
+    processScripts: ['text/javascript'],
+    useShortDoctype: true,
+    collapseWhitespace: true,
+    removeAttributeQuotes: true,
+    removeRedundantAttributes: true,
+    collapseBooleanAttributes: true,
+    removeScriptTypeAttributes: true,
+    collapseInlineTagWhitespace: true,
+    removeStyleLinkTypeAttributes: true,
+  }
+}))
 
 // use EJS as our templating engine
 app.set('view engine', 'ejs')

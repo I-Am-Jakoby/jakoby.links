@@ -46,10 +46,11 @@ adminApiRouter.post('/cleanup_301_webhooks', async (req, res) => {
     if (looksLikeDiscordWebhook) {
       actionsCollector.push({ shortcode, redirect, status, action: 'Send discord webhook message.' })
 
-      axios.post(redirect, {
-        username: appDiscordUser,
-        avatar_url: appDiscordUserImage,
-        content: `
+      try {
+        axios.post(redirect, {
+          username: appDiscordUser,
+          avatar_url: appDiscordUserImage,
+          content: `
 It looks like you're trying to use \`${appRoot}\` to shorten a webhook.
 You should use status \`307\` instead of \`301\`.
 
@@ -57,8 +58,11 @@ You should use status \`307\` instead of \`301\`.
 
 *Check out this article for more information:*
 *https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307*
-        `
-      })
+          `
+        })
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     actionsCollector.push({ shortcode, redirect, status, action: 'Deleting shortcode.' })
