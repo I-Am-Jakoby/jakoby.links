@@ -7,6 +7,7 @@ const uuid = require('uuid')
 const axios = require('axios')
 const crypto = require('crypto')
 const express = require('express')
+const session = require('express-session')
 const bodyParser = require('body-parser')
 const minifyHTML = require('express-minify-html')
 
@@ -71,6 +72,13 @@ app.use(minifyHTML({
     collapseInlineTagWhitespace: true,
     removeStyleLinkTypeAttributes: true,
   }
+}))
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
 }))
 
 // use EJS as our templating engine
