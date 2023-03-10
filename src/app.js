@@ -53,8 +53,8 @@ passport.serializeUser(async (user, cb) => {
 })
 
 passport.deserializeUser(async (user, cb) => {
-  console.log('deserialize', user)
-  return cb(null, user)
+  const userRecord = await users.get(user.key)
+  return cb(null, userRecord)
 })
 
 const app = express()
