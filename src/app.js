@@ -1,7 +1,6 @@
 const fs = require('fs')
 const ejs = require('ejs')
 const get = require('lodash/get')
-const first = require('lodash/first')
 const path = require('path')
 const uuid = require('uuid')
 const axios = require('axios')
@@ -36,14 +35,13 @@ passport.use(new GitHubStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const { results: userRecords } = await users.filter({ _github_auth: { profile: { id: profile.id } } })
-    if (userRecords.length) return done(null, first(userRecords))
+    if (userRecords.length) return done(null, get(userRecords, '0.props'))
 
     // Record not found. Create a new user
     const userId = uuid.v4()
     await users.set(userId, { _github_auth: { accessToken, profile } })
     const newUser = await users.get(userId)
-    console.log(newUser)
-    done(null, newUser)
+    done(null, get(newUser, 'props'))
   } catch (e) {
     done(e)
   }
