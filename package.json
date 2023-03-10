@@ -28,6 +28,8 @@
     "highlight.js": "^11.7.0",
     "lodash": "^4.17.21",
     "marked": "^4.2.5",
+    "passport": "^0.6.0",
+    "passport-github2": "^0.1.12",
     "uuid": "^9.0.0"
   }
 }

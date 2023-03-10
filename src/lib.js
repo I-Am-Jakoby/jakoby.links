@@ -7,6 +7,7 @@ const { marked } = require('marked')
 module.exports.db = db
 module.exports.marked = marked
 
+const users = module.exports.users = db.collection('users')
 const shortcodes = module.exports.shortcodes = db.collection('shortcodes')
 const shortcodeCreations = module.exports.shortcodeCreations = db.collection('shortcode_creations')
 const shortcodeInvocations = module.exports.shortcodeInvocations = db.collection('shortcode_invocations')

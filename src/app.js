@@ -11,6 +11,7 @@ const minifyHTML = require('express-minify-html')
 
 const {
   marked,
+  users,
   shortcodes,
   shortcodeCreations,
   shortcodeInvocations,
@@ -22,6 +23,24 @@ const {
   appNotifyHook,
   generateShortcode, formatShortcodeRecord
 } = require('./lib')
+
+const passport = require('passport')
+const GitHubStrategy = require('passport-github2')
+
+passport.use(new GitHubStrategy({
+  clientID: process.env.GITHUB_CLIENT_ID,
+  clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  callbackURL: `${process.env.DEPLOYMENT}/auth/github/callback`
+}, (accessToken, refreshToken, profile, done) => {
+
+  console.log(accessToken, refreshToken, profile, done)
+  return done(new Error('dicks'))
+
+  // User.findOrCreate({ githubId: profile.id }, function (err, user) {
+  //   return done(err, user);
+  // })
+
+}))
 
 const app = express()
 
@@ -52,7 +71,12 @@ app.use(minifyHTML({
 app.set('view engine', 'ejs')
 
 // Add the admin router
-app.use('/admin', require('./admin'))
+app.use('/admin', passport.authenticate('github', { scope: [ 'user:email' ] }), require('./admin'))
+app.get('/auth/github', passport.authenticate('github', { scope: [ 'user:email' ] }))
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+  // Successful authentication, redirect home.
+  res.redirect('/home')
+});
 
 // CREATE
 app.post('/',
