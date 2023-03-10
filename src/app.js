@@ -39,7 +39,7 @@ passport.use(new GitHubStrategy({
 
     // Record not found. Create a new user
     const userId = uuid.v4()
-    await users.set(userId, { _github_auth: { accessToken, refreshToken, profile } })
+    await users.set(userId, { _github_auth: { accessToken, profile } })
     const newUser = await users.get(userId)
     console.log(newUser)
     done(null, newUser)
