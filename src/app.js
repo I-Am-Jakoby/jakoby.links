@@ -31,15 +31,13 @@ passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
   callbackURL: `${process.env.DEPLOYMENT}/auth/github/callback`
-}, (accessToken, refreshToken, profile, done) => {
-
-  console.log(accessToken, refreshToken, profile, done)
-  return done(new Error('dicks'))
-
+}, async (accessToken, refreshToken, profile, done) => {
+  const user = await users.filter({ github_auth: { profile: { username: profile.username } } })
+  console.log(user)
+  // await shortcodeInvocations.set(invocation, { invocation, shortcode, protocol, ip, method, path, baseUrl, params, query, body })
   // User.findOrCreate({ githubId: profile.id }, function (err, user) {
   //   return done(err, user);
   // })
-
 }))
 
 const app = express()
@@ -73,7 +71,7 @@ app.set('view engine', 'ejs')
 // Add the admin router
 app.use('/admin', passport.authenticate('github', { scope: [ 'user:email' ] }), require('./admin'))
 app.get('/auth/github', passport.authenticate('github', { scope: [ 'user:email' ] }))
-app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
   // Successful authentication, redirect home.
   res.redirect('/home')
 });
