@@ -35,17 +35,27 @@ passport.use(new GitHubStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const { results: userRecords } = await users.filter({ _github_auth: { profile: { id: profile.id } } })
-    if (userRecords.length) return done(null, get(userRecords, '0.props'))
+    if (userRecords.length) return done(null, get(userRecords, '0'))
 
     // Record not found. Create a new user
     const userId = uuid.v4()
     await users.set(userId, { _github_auth: { accessToken, profile } })
     const newUser = await users.get(userId)
-    done(null, get(newUser, 'props'))
+    done(null, get(newUser))
   } catch (e) {
     done(e)
   }
 }))
+
+passport.serializeUser(async (user, cb) => {
+  console.log('serialize', user)
+  return cb(null, user)
+})
+
+passport.deserializeUser(async (user, cb) => {
+  console.log('deserialize', user)
+  return cb(null, user)
+})
 
 const app = express()
 
