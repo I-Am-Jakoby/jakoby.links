@@ -101,8 +101,8 @@ app.get('/auth/github', (req, res, next) => {
 app.get('/auth/github/callback', passport.authenticate('github', {
   failureRedirect: '/'
 }), (req, res) => {
-  const redirect = get(req, 'session.returnTo', '/')
-  res.json(redirect)
+  res.json(req.session)
+  // const redirect = get(req, 'session.returnTo', '/')
   // res.redirect(redirect)
 })
 
