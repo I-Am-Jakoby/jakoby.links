@@ -100,9 +100,9 @@ app.get('/auth/github', (req, res, next) => {
 
 app.get('/auth/github/callback', passport.authenticate('github', {
   failureRedirect: '/'
-}), async (req, res) => {
-  res.redirect(req.session.redirectTo)
-});
+}), (req, res) => {
+  res.redirect(`/${req.session.redirectTo}`)
+})
 
 // Add the admin router
 app.use('/admin', require('./admin'))
