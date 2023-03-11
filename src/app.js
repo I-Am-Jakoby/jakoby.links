@@ -94,9 +94,13 @@ app.set('view engine', 'ejs')
 
 // Add authentication
 app.get('/auth/github', passport.authenticate('github', { scope: [ 'user:email' ] }))
-app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
+app.get('/auth/github/callback', passport.authenticate('github', {
+  failureRedirect: '/auth/github'
+}), async (req, res) => {
+  console.log(req.params)
+  console.log(req.query)
   // Successful authentication, redirect home.
-  res.redirect('/home')
+  res.redirect('/')
 });
 
 // Add the admin router
