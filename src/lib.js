@@ -7,6 +7,7 @@ const { marked } = require('marked')
 module.exports.db = db
 module.exports.marked = marked
 
+const users = module.exports.users = db.collection('users')
 const shortcodes = module.exports.shortcodes = db.collection('shortcodes')
 const shortcodeCreations = module.exports.shortcodeCreations = db.collection('shortcode_creations')
 const shortcodeInvocations = module.exports.shortcodeInvocations = db.collection('shortcode_invocations')
@@ -25,7 +26,7 @@ const appNotifyHook = module.exports.appNotifyHook = get(process, 'env.NOTIFY_WE
 const appDiscordUser = module.exports.appDiscordUser = get(process, 'env.DISCORD_USER', appRoot)
 const appDiscordUserImage = module.exports.appDiscordUserImage = get(process, 'env.DISCORD_USER_IMAGE', 'https://i.imgur.com/myekW.jpeg')
 
-const allowedStatuses = module.exports.allowedStatuses = [ 300, 301, 302, 303, 304, 307 ]
+const allowedStatuses = module.exports.allowedStatuses = [ 300, 301, 302, 303, 304, 307, 308 ]
 
 module.exports.appVars = {
   port: appPort,

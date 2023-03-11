@@ -6,10 +6,13 @@ const uuid = require('uuid')
 const axios = require('axios')
 const crypto = require('crypto')
 const express = require('express')
+const session = require('express-session')
 const bodyParser = require('body-parser')
+const minifyHTML = require('express-minify-html')
 
 const {
   marked,
+  users,
   shortcodes,
   shortcodeCreations,
   shortcodeInvocations,
@@ -22,13 +25,80 @@ const {
   generateShortcode, formatShortcodeRecord
 } = require('./lib')
 
+const passport = require('passport')
+const GitHubStrategy = require('passport-github2')
+
+passport.use(new GitHubStrategy({
+  clientID: process.env.GITHUB_CLIENT_ID,
+  clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  callbackURL: `${process.env.DEPLOYMENT}/auth/github/callback`
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const { results: userRecords } = await users.filter({ _github_auth: { profile: { id: profile.id } } })
+    if (userRecords.length) return done(null, get(userRecords, '0'))
+
+    // Record not found. Create a new user
+    const userId = uuid.v4()
+    await users.set(userId, { _github_auth: { accessToken, profile } })
+    const newUser = await users.get(userId)
+    done(null, get(newUser))
+  } catch (e) {
+    done(e)
+  }
+}))
+
+passport.serializeUser(async (user, cb) => {
+  console.log('serialize', user)
+  return cb(null, user)
+})
+
+passport.deserializeUser(async (user, cb) => {
+  const userRecord = await users.get(user.key)
+  return cb(null, userRecord)
+})
+
 const app = express()
+
+// Minify html output
+app.use(minifyHTML({
+  override: true,
+  exception_url: false,
+  htmlMinifier: {
+    minifyJS: true,
+    minifyCSS: true,
+    minifyURLs: true,
+    sortClassName: true,
+    sortAttributes: true,
+    removeComments: true,
+    processScripts: ['text/javascript'],
+    useShortDoctype: true,
+    collapseWhitespace: true,
+    removeAttributeQuotes: true,
+    removeRedundantAttributes: true,
+    collapseBooleanAttributes: true,
+    removeScriptTypeAttributes: true,
+    collapseInlineTagWhitespace: true,
+    removeStyleLinkTypeAttributes: true,
+  }
+}))
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}))
 
 // use EJS as our templating engine
 app.set('view engine', 'ejs')
 
 // Add the admin router
-app.use('/admin', require('./admin'))
+app.use('/admin', passport.authenticate('github', { scope: [ 'user:email' ] }), require('./admin'))
+app.get('/auth/github', passport.authenticate('github', { scope: [ 'user:email' ] }))
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
+  // Successful authentication, redirect home.
+  res.redirect('/home')
+});
 
 // CREATE
 app.post('/',

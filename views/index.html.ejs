@@ -104,7 +104,7 @@
           successModalShortcode.innerText = ('<%=appVars.root%>/' + responseBody.shortcode);
           successModal.show();
         });
-        xhr.open("POST", '<%=appVars.root%>/');
+        xhr.open("POST", e.target.action);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(formObject));
       });

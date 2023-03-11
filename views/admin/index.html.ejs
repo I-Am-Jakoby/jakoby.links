@@ -11,7 +11,6 @@
           <li class="breadcrumb-item active">Index</li>
         </ol>
       </nav>
-
       <div class="my-5">
         <h5>Tools</h5>
         <div class="card">
@@ -39,7 +38,6 @@
         </div>
       </div>
     </div>
-
     <div id="cleanup_301_webhooks_modal" class="modal modal-xl fade" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -82,12 +80,10 @@
         const xhr = new XMLHttpRequest();
         xhr.addEventListener("load", () => {
           var actions = JSON.parse(xhr.response);
-          successModalBody.innerText = actions.map(({ action, shortcode }) => {
-            return `${action} ${shortcode}`
-          }).join('\n');
+          successModalBody.innerText = actions.map(({ action, shortcode }) => `${action} ${shortcode}`).join('\n');
           successModal.show();
         });
-        xhr.open("POST", "<%=appVars.root%>/admin/api/cleanup_301_webhooks");
+        xhr.open("POST", e.target.action);
         xhr.send();
       });
     </script>

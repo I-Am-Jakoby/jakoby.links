@@ -1,5 +1,6 @@
-const get = require('lodash/get')
 const axios = require('axios')
+const get = require('lodash/get')
+const groupBy = require('lodash/groupBy')
 const { Router } = require('express')
 
 const {
@@ -28,6 +29,7 @@ adminApiRouter.delete('/shortcodes/:shortcode', async (req, res) => {
   }
 })
 
+// Cleanup HTTP 301 webhooks
 adminApiRouter.post('/cleanup_301_webhooks', async (req, res) => {
   const { results } = await shortcodes.list(Infinity)
 
@@ -46,10 +48,11 @@ adminApiRouter.post('/cleanup_301_webhooks', async (req, res) => {
     if (looksLikeDiscordWebhook) {
       actionsCollector.push({ shortcode, redirect, status, action: 'Send discord webhook message.' })
 
-      axios.post(redirect, {
-        username: appDiscordUser,
-        avatar_url: appDiscordUserImage,
-        content: `
+      try {
+        axios.post(redirect, {
+          username: appDiscordUser,
+          avatar_url: appDiscordUserImage,
+          content: `
 It looks like you're trying to use \`${appRoot}\` to shorten a webhook.
 You should use status \`307\` instead of \`301\`.
 
@@ -57,8 +60,11 @@ You should use status \`307\` instead of \`301\`.
 
 *Check out this article for more information:*
 *https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/307*
-        `
-      })
+          `
+        })
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     actionsCollector.push({ shortcode, redirect, status, action: 'Deleting shortcode.' })
@@ -66,6 +72,14 @@ You should use status \`307\` instead of \`301\`.
   })
 
   return res.json(actionsCollector)
+})
+
+adminApiRouter.get('/reporting', async (req, res) => {
+  res.json({
+    creations: await shortcodeCreations.filter(),
+    shortcodes: await shortcodes.filter(),
+    invocations: await shortcodeInvocations.filter()
+  })
 })
 
 module.exports = adminApiRouter

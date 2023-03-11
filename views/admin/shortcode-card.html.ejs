@@ -13,8 +13,10 @@
     </dl>
   </div>
   <div class="card-footer text-end">
-    <button class="btn btn-sm btn-danger" data-delete="<%=shortcode._key%>">
-      Delete
-    </button>
+    <form action="<%=appVars.root%>/admin/api/shortcodes/<%=shortcode._key%>" method="delete" data-delete-shortcode>
+      <button type="submit" class="btn btn-sm btn-danger">
+        Delete
+      </button>
+    </form>
   </div>
 </div>
