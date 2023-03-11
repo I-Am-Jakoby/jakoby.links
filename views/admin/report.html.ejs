@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%-include('../_head.html.ejs', { appVars })%>
+  </head>
+  <body class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col col-md-6">
+          <canvas id="invocations_by_shortcode"></canvas>
+        </div>
+        <div class="col col-md-6">
+          <canvas id="invocations_by_country"></canvas>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="text/javascript">
+    const invocationsByShortcodeChart = new Chart(document.getElementById('invocations_by_shortcode'), {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(invocationsByShortcodeLabels) %>,
+        datasets: [{ label: 'Shortcode', data: <%- JSON.stringify(invocationsByShortcodeData) %> }]
+      }
+    });
+
+    const invocationsByCountryChart = new Chart(document.getElementById('invocations_by_country'), {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(invocationsByCountryLabels) %>,
+        datasets: [{ label: 'Country', data: <%- JSON.stringify(invocationsByCountryData) %> }]
+      }
+    });
+
+    window.addEventListener('resize', function(e) {
+      window.requestAnimationFrame(function() {
+        invocationsByShortcodeChart.resize();
+        invocationsByCountryChart.resize();
+      });
+    });
+  </script>
+</html>

@@ -113,7 +113,8 @@ const authenticateWithRedirect = (req, res, next) => {
 }
 
 // Add the admin router
-app.use('/admin', authenticateWithRedirect, require('./admin'))
+// app.use('/admin', authenticateWithRedirect, require('./admin'))
+app.use('/admin', require('./admin'))
 
 // CREATE
 app.post('/',

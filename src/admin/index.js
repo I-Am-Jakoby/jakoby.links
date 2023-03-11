@@ -33,4 +33,6 @@ adminAppRouter.get('/shortcodes/:shortcode', async (req, res) => {
   res.render('admin/shortcode.html.ejs', { appVars, shortcode, creation, invocations })
 })
 
+adminAppRouter.get('/report', require('./report'))
+
 module.exports = adminAppRouter
