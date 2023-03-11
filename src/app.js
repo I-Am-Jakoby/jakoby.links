@@ -102,7 +102,8 @@ app.get('/auth/github/callback', passport.authenticate('github', {
   failureRedirect: '/'
 }), (req, res) => {
   const redirect = get(req, 'session.returnTo', '/')
-  res.redirect(redirect)
+  res.json(redirect)
+  // res.redirect(redirect)
 })
 
 // Add the admin router
