@@ -92,13 +92,15 @@ app.use(session({
 // use EJS as our templating engine
 app.set('view engine', 'ejs')
 
-// Add the admin router
-app.use('/admin', passport.authenticate('github', { scope: [ 'user:email' ] }), require('./admin'))
+// Add authentication
 app.get('/auth/github', passport.authenticate('github', { scope: [ 'user:email' ] }))
 app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
   // Successful authentication, redirect home.
   res.redirect('/home')
 });
+
+// Add the admin router
+app.use('/admin', require('./admin'))
 
 // CREATE
 app.post('/',
