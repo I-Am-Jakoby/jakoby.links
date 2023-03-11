@@ -9,6 +9,7 @@ const express = require('express')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 const minifyHTML = require('express-minify-html')
+const cookieParser = require('cookie-parser')
 
 const {
   marked,
@@ -93,17 +94,16 @@ app.use(session({
 app.set('view engine', 'ejs')
 
 // Add authentication
-app.get('/auth/github', (req, res, next) => {
-  req.session.returnTo = req.query.returnTo
+app.get('/auth/github', cookieParser(), (req, res, next) => {
+  const returnTo = get(req, 'query.returnTo', '/')
+  res.cookie('returnTo', returnTo, { expire: Date.now() + (1000 * 60 * 60) })
   next()
 }, passport.authenticate('github', { scope: [ 'user:email' ] }))
 
 app.get('/auth/github/callback', passport.authenticate('github', {
   failureRedirect: '/'
-}), (req, res) => {
-  res.json(req.session)
-  // const redirect = get(req, 'session.returnTo', '/')
-  // res.redirect(redirect)
+}), cookieParser(), (req, res) => {
+  res.redirect(get(req, 'cookies.returnTo', '/'))
 })
 
 // Add the admin router
